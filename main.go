@@ -3,6 +3,7 @@ package main
 import (
 	"117503445/traefik-provider-frp/pkg/frpsadmin"
 	"117503445/traefik-provider-frp/pkg/frpsplugin"
+	"117503445/traefik-provider-frp/pkg/state"
 
 	"github.com/117503445/goutils"
 	"github.com/alecthomas/kong"
@@ -23,9 +24,16 @@ func main() {
 	kong.Parse(&cfg, kong.Configuration(kongtoml.Loader, "./config.toml"))
 	log.Info().Interface("cfg", cfg).Msg("main")
 
-	frpsadmin.GetRoutes(cfg.FrpsAdmin)
+	stateUpdateCallback := func(state map[string]int) {
+		log.Info().Interface("state", state).Msg("state update")
+	}
 
-	err := frpsplugin.NewServer().Serve(cfg.FrpsPlugin.Port)
+	serviceDestState := state.NewServiceDestState(stateUpdateCallback)
+
+	frpsAdminManager := frpsadmin.NewFrpsAdminManager(cfg.FrpsAdmin)
+	frpsAdminManager.SetState(serviceDestState)
+
+	err := frpsplugin.NewServer(serviceDestState).Serve(cfg.FrpsPlugin.Port)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to serve frps-plugin server")
 	}

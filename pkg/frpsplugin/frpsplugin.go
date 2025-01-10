@@ -1,6 +1,7 @@
 package frpsplugin
 
 import (
+	"117503445/traefik-provider-frp/pkg/state"
 	"fmt"
 	"io"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 )
 
 type Server struct {
+	serviceDestState *state.ServiceDestState
 }
 
 func (s *Server) Serve(port int) error {
@@ -34,6 +36,8 @@ func (s *Server) Serve(port int) error {
 	return http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 }
 
-func NewServer() *Server {
-	return &Server{}
+func NewServer(serviceDestState *state.ServiceDestState) *Server {
+	return &Server{
+		serviceDestState: serviceDestState,
+	}
 }

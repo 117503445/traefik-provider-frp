@@ -7,9 +7,7 @@ import (
 	"net/http"
 
 	"github.com/rs/zerolog/log"
-	"github.com/tidwall/gjson"
 )
-
 
 type Server struct {
 	frpsAdmin *admin.FrpsAdminManager
@@ -36,11 +34,12 @@ func (s *Server) Serve(port int) error {
 		op := r.URL.Query().Get("op")
 
 		log.Info().Str("op", op).Str("payload", string(payload)).Msg("req")
+		// log.Info().Str("op", op).Msg("req")
 
-		domainResult := gjson.GetBytes(payload, "content.metas.domain")
-		if !domainResult.Exists() {
-			return
-		}
+		// domainResult := gjson.GetBytes(payload, "content.metas.domain")
+		// if !domainResult.Exists() {
+		// 	return
+		// }
 
 		s.frpsAdmin.FetchProxies()
 

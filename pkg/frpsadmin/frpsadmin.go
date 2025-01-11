@@ -68,9 +68,5 @@ func (m *FrpsAdminManager) SetState(serviceDestState *state.ServiceDestState) {
 		}
 	}
 
-	// Output the result
-	// for key, value := range result {
-	// 	fmt.Printf("%s: %d\n", key, value)
-	// }
 	serviceDestState.SetMap(result)
 }

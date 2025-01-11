@@ -2,6 +2,8 @@ package main
 
 import (
 	"117503445/traefik-provider-frp/pkg/frps/admin"
+	"117503445/traefik-provider-frp/pkg/frps/plugin"
+	"117503445/traefik-provider-frp/pkg/traefik/writer"
 
 	"github.com/117503445/goutils"
 	"github.com/alecthomas/kong"
@@ -16,22 +18,23 @@ type FrpsPluginCfg struct {
 func main() {
 	goutils.InitZeroLog()
 	var cfg struct {
-		FrpsAdmin  *admin.FrpsAdminCfg `embed:"" prefix:"frps-admin."`
-		FrpsPlugin *FrpsPluginCfg          `embed:"" prefix:"frps-plugin."`
+		FrpsAdmin     *admin.FrpsAdminCfg      `embed:"" prefix:"frps-admin."`
+		FrpsPlugin    *FrpsPluginCfg           `embed:"" prefix:"frps-plugin."`
+		TraefikWriter *writer.TraefikWriterCfg `embed:"" prefix:"traefik-writer."`
 	}
 	kong.Parse(&cfg, kong.Configuration(kongtoml.Loader, "./config.toml"))
-	log.Info().Interface("cfg", cfg).Msg("main")
+	log.Info().Interface("cfg", cfg).Msg("")
 
-	stateUpdateCallback := func(state map[string]int) {
-		log.Info().Interface("state", state).Msg("state update")
-	}
+	traefikWriter := writer.NewTraefikWriter(cfg.TraefikWriter)
 
-	// serviceDestState := state.NewServiceDestState(stateUpdateCallback)
+	frpsAdminManager := admin.NewFrpsAdminManager(cfg.FrpsAdmin, traefikWriter)
+	frpsAdminManager.Start()
+	// fetch all proxies at the beginning
+	frpsAdminManager.FetchProxies()
 
-	frpsAdminManager := frpsadmin.NewFrpsAdminManager(cfg.FrpsAdmin)
-	frpsAdminManager.SetState(serviceDestState)
+	frpsPlugin := plugin.NewServer(frpsAdminManager)
 
-	err := frpsplugin.NewServer(serviceDestState).Serve(cfg.FrpsPlugin.Port)
+	err := frpsPlugin.Serve(cfg.FrpsPlugin.Port)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to serve frps-plugin server")
 	}

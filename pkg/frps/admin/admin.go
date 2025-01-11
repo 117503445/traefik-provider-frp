@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"117503445/traefik-provider-frp/pkg/traefik/writer"
 	"fmt"
 
 	"github.com/117503445/goutils"
@@ -18,16 +19,24 @@ type FrpsAdminCfg struct {
 type FrpsAdminManager struct {
 	cfg                *FrpsAdminCfg
 	latestTaskExecutor *goutils.LatestTaskExecutor
+	traefikWriter      *writer.TraefikWriter
 }
 
-func NewFrpsAdminManager(cfg *FrpsAdminCfg) *FrpsAdminManager {
+func NewFrpsAdminManager(cfg *FrpsAdminCfg, traefikWriter *writer.TraefikWriter) *FrpsAdminManager {
 	return &FrpsAdminManager{
 		cfg:                cfg,
 		latestTaskExecutor: goutils.NewLatestTaskExecutor(),
+		traefikWriter:      traefikWriter,
 	}
 }
+
+func (m *FrpsAdminManager) Start() {
+	m.latestTaskExecutor.Start()
+}
+
 func (m *FrpsAdminManager) FetchProxies() {
 	m.latestTaskExecutor.AddTask(func() {
+		log.Info().Msg("fetch proxies")
 		// log.Info().Interface("cfg", m.cfg).Msg("getFull")
 
 		// client := req.C().EnableDumpAll()
@@ -38,7 +47,7 @@ func (m *FrpsAdminManager) FetchProxies() {
 			log.Fatal().Err(err).Msg("failed to get full config from frps-admin")
 		}
 
-		result := make(map[string]int)
+		domainPort := make(map[string]int)
 
 		proxiesArray := gjson.GetBytes(resp.Bytes(), "proxies")
 		proxiesArray.ForEach(func(key, proxy gjson.Result) bool {
@@ -52,9 +61,10 @@ func (m *FrpsAdminManager) FetchProxies() {
 				if domain == "" {
 					domain = conf.Get("name").String()
 				}
-				result[domain] = int(conf.Get("remotePort").Int())
+				domainPort[domain] = int(conf.Get("remotePort").Int())
 			}
 			return true
 		})
+		m.traefikWriter.Write(domainPort)
 	})
 }

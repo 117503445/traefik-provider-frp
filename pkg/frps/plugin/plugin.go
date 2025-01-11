@@ -10,6 +10,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+
 type Server struct {
 	frpsAdmin *admin.FrpsAdminManager
 }

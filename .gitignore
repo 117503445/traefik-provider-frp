@@ -25,3 +25,5 @@ go.work.sum
 .env
 
 config.toml
+traefik.tmpl
+frp_dynamic.yml

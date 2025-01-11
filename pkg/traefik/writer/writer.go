@@ -36,8 +36,8 @@ func NewTraefikWriter(cfg *TraefikWriterCfg) *TraefikWriter {
 
 func (w *TraefikWriter) Write(DomainPort map[string]int) {
 	type TraefikService struct {
-		Service string
-		Url     string
+		Service string `json:"service"`
+		Url     string `json:"url"`
 	}
 	services := make([]TraefikService, 0, len(DomainPort))
 	for domain, port := range DomainPort {

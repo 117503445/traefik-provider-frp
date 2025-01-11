@@ -12,8 +12,7 @@ import (
 )
 
 type Server struct {
-	serviceDestState *state.ServiceDestState
-	frpsAdmin        *frpsadmin.FrpsAdminManager
+	frpsAdmin *frpsadmin.FrpsAdminManager
 }
 
 func (s *Server) Serve(port int) error {
@@ -21,13 +20,12 @@ func (s *Server) Serve(port int) error {
 		var err error
 
 		defer func() {
+			// always return accept response
 			_, err = w.Write([]byte(`{"reject": false,"unchange": true}`))
 			if err != nil {
 				log.Error().Err(err).Msg("failed to write response")
 			}
 		}()
-
-		// get args['op']
 
 		payload, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -44,12 +42,14 @@ func (s *Server) Serve(port int) error {
 			return
 		}
 
+		s.frpsAdmin.FetchProxies()
+
 		// opResult := gjson.GetBytes(payload, "op")
 
-		serviceName := domainResult.String()
-		if serviceName == "" {
-			serviceName = gjson.GetBytes(payload, "content.proxy_name").String()
-		}
+		// serviceName := domainResult.String()
+		// if serviceName == "" {
+		// 	serviceName = gjson.GetBytes(payload, "content.proxy_name").String()
+		// }
 
 		// port := gjson.GetBytes(payload, "content.metas.port").Int()
 
@@ -60,7 +60,6 @@ func (s *Server) Serve(port int) error {
 
 func NewServer(serviceDestState *state.ServiceDestState, frpsAdmin *frpsadmin.FrpsAdminManager) *Server {
 	return &Server{
-		serviceDestState: serviceDestState,
-		frpsAdmin:        frpsAdmin,
+		frpsAdmin: frpsAdmin,
 	}
 }

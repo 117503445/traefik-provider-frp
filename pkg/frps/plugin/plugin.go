@@ -1,8 +1,7 @@
-package frpsplugin
+package plugin
 
 import (
-	"117503445/traefik-provider-frp/pkg/frpsadmin"
-	"117503445/traefik-provider-frp/pkg/state"
+	"117503445/traefik-provider-frp/pkg/frps/admin"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,7 +11,7 @@ import (
 )
 
 type Server struct {
-	frpsAdmin *frpsadmin.FrpsAdminManager
+	frpsAdmin *admin.FrpsAdminManager
 }
 
 func (s *Server) Serve(port int) error {
@@ -58,7 +57,7 @@ func (s *Server) Serve(port int) error {
 	return http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 }
 
-func NewServer(serviceDestState *state.ServiceDestState, frpsAdmin *frpsadmin.FrpsAdminManager) *Server {
+func NewServer(frpsAdmin *admin.FrpsAdminManager) *Server {
 	return &Server{
 		frpsAdmin: frpsAdmin,
 	}

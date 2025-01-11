@@ -1,4 +1,4 @@
-package frpsadmin
+package admin
 
 import (
 	"fmt"

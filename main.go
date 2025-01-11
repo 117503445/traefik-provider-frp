@@ -1,9 +1,7 @@
 package main
 
 import (
-	"117503445/traefik-provider-frp/pkg/frpsadmin"
-	"117503445/traefik-provider-frp/pkg/frpsplugin"
-	"117503445/traefik-provider-frp/pkg/state"
+	"117503445/traefik-provider-frp/pkg/frps/admin"
 
 	"github.com/117503445/goutils"
 	"github.com/alecthomas/kong"
@@ -18,7 +16,7 @@ type FrpsPluginCfg struct {
 func main() {
 	goutils.InitZeroLog()
 	var cfg struct {
-		FrpsAdmin  *frpsadmin.FrpsAdminCfg `embed:"" prefix:"frps-admin."`
+		FrpsAdmin  *admin.FrpsAdminCfg `embed:"" prefix:"frps-admin."`
 		FrpsPlugin *FrpsPluginCfg          `embed:"" prefix:"frps-plugin."`
 	}
 	kong.Parse(&cfg, kong.Configuration(kongtoml.Loader, "./config.toml"))
@@ -28,7 +26,7 @@ func main() {
 		log.Info().Interface("state", state).Msg("state update")
 	}
 
-	serviceDestState := state.NewServiceDestState(stateUpdateCallback)
+	// serviceDestState := state.NewServiceDestState(stateUpdateCallback)
 
 	frpsAdminManager := frpsadmin.NewFrpsAdminManager(cfg.FrpsAdmin)
 	frpsAdminManager.SetState(serviceDestState)

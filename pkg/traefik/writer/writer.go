@@ -59,5 +59,7 @@ func (w *TraefikWriter) Write(DomainPort map[string]int) {
 	err = goutils.WriteText(w.cfg.OutputPath, outputContent)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to write output")
+	}else{
+		log.Info().Str("output", w.cfg.OutputPath).Str("content", outputContent).Msg("write output success")
 	}
 }

@@ -27,3 +27,5 @@ go.work.sum
 config.toml
 traefik.tmpl
 frp_dynamic.yml
+
+traefik-provider-frp

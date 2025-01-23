@@ -65,6 +65,9 @@ func (m *FrpsAdminManager) FetchProxies() {
 			}
 			return true
 		})
+
+		log.Info().Interface("domainPort", domainPort).Msg("fetch proxies")
+
 		m.traefikWriter.Write(domainPort)
 	})
 }

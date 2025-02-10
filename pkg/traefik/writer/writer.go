@@ -40,7 +40,7 @@ func NewTraefikWriter(cfg *TraefikWriterCfg) *TraefikWriter {
 }
 
 func (w *TraefikWriter) Run() {
-	http.HandleFunc("/", func(writer http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/traefik", func(writer http.ResponseWriter, r *http.Request) {
 		w.outputContentLock.RLock()
 		content := w.outputContent
 		w.outputContentLock.RUnlock()

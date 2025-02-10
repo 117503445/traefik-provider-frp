@@ -14,7 +14,7 @@ type Server struct {
 }
 
 func (s *Server) Serve(port int) error {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/frp", func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
 		defer func() {

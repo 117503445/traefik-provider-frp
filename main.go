@@ -26,6 +26,9 @@ func main() {
 	log.Info().Interface("cfg", cfg).Msg("")
 
 	traefikWriter := writer.NewTraefikWriter(cfg.TraefikWriter)
+	go func() {
+		traefikWriter.Run()
+	}()
 
 	frpsAdminManager := admin.NewFrpsAdminManager(cfg.FrpsAdmin, traefikWriter)
 	frpsAdminManager.Start()

@@ -3,7 +3,9 @@ package writer
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/117503445/goutils"
 	"github.com/rs/zerolog/log"
@@ -20,6 +22,9 @@ type TraefikWriterCfg struct {
 type TraefikWriter struct {
 	cfg      *TraefikWriterCfg
 	template string
+
+	outputContent     string
+	outputContentLock sync.RWMutex
 }
 
 func NewTraefikWriter(cfg *TraefikWriterCfg) *TraefikWriter {
@@ -31,6 +36,21 @@ func NewTraefikWriter(cfg *TraefikWriterCfg) *TraefikWriter {
 	return &TraefikWriter{
 		cfg:      cfg,
 		template: template,
+	}
+}
+
+func (w *TraefikWriter) Run() {
+	http.HandleFunc("/", func(writer http.ResponseWriter, r *http.Request) {
+		w.outputContentLock.RLock()
+		content := w.outputContent
+		w.outputContentLock.RUnlock()
+
+		writer.Write([]byte(content))
+	})
+	address, port := "0.0.0.0", "8081"
+	log.Info().Str("address", address).Str("port", port).Msg("start traefik dynamic config server")
+	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", address, port), nil); err != nil {
+		fmt.Printf("Server failed to start: %v\n", err)
 	}
 }
 
@@ -54,12 +74,16 @@ func (w *TraefikWriter) Write(DomainPort map[string]int) {
 	}
 	servicesStr := string(servicesBytes)
 
-	outputContent := strings.ReplaceAll(w.template, "$SERVICES$", servicesStr)
+	content := strings.ReplaceAll(w.template, "$SERVICES$", servicesStr)
 
-	err = goutils.WriteText(w.cfg.OutputPath, outputContent)
+	w.outputContentLock.Lock()
+	w.outputContent = content
+	w.outputContentLock.Unlock()
+
+	err = goutils.WriteText(w.cfg.OutputPath, content)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to write output")
-	}else{
-		log.Info().Str("output", w.cfg.OutputPath).Str("content", outputContent).Msg("write output success")
+	} else {
+		log.Info().Str("output", w.cfg.OutputPath).Str("content", content).Msg("write output success")
 	}
 }

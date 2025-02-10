@@ -1,15 +1,35 @@
 package writer
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 	"sync"
+	"text/template"
 
 	"github.com/117503445/goutils"
+	"github.com/Masterminds/sprig/v3"
 	"github.com/rs/zerolog/log"
 )
+
+func GetHttpContent(outputContent string) string {
+	tmpl, err := template.New("example").Funcs(sprig.FuncMap()).Parse(outputContent)
+	if err != nil {
+		log.Warn().Err(err).Msg("failed to parse template")
+		return ""
+	}
+
+	var buf bytes.Buffer
+
+	if err := tmpl.Execute(&buf, nil); err != nil {
+		log.Warn().Err(err).Msg("failed to execute template")
+		return ""
+	}
+
+	return buf.String()
+}
 
 type TraefikWriterCfg struct {
 	TemplatePath string `help:"traefik dynamic config template path" default:"./traefik.tmpl"`
@@ -23,8 +43,8 @@ type TraefikWriter struct {
 	cfg      *TraefikWriterCfg
 	template string
 
-	outputContent     string
-	outputContentLock sync.RWMutex
+	httpContent     string
+	httpContentLock sync.RWMutex
 }
 
 func NewTraefikWriter(cfg *TraefikWriterCfg) *TraefikWriter {
@@ -41,9 +61,9 @@ func NewTraefikWriter(cfg *TraefikWriterCfg) *TraefikWriter {
 
 func (w *TraefikWriter) Run() {
 	http.HandleFunc("/traefik", func(writer http.ResponseWriter, r *http.Request) {
-		w.outputContentLock.RLock()
-		content := w.outputContent
-		w.outputContentLock.RUnlock()
+		w.httpContentLock.RLock()
+		content := w.httpContent
+		w.httpContentLock.RUnlock()
 
 		writer.Write([]byte(content))
 	})
@@ -76,9 +96,9 @@ func (w *TraefikWriter) Write(DomainPort map[string]int) {
 
 	content := strings.ReplaceAll(w.template, "$SERVICES$", servicesStr)
 
-	w.outputContentLock.Lock()
-	w.outputContent = content
-	w.outputContentLock.Unlock()
+	w.httpContentLock.Lock()
+	w.httpContent = GetHttpContent(content)
+	w.httpContentLock.Unlock()
 
 	err = goutils.WriteText(w.cfg.OutputPath, content)
 	if err != nil {

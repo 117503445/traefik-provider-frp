@@ -1,0 +1,24 @@
+{{- $data := `
+   [{"service":"vsc-1","url":"http://frps:9832"},{"service":"vsc-2","url":"http://frps:51377"}]
+` | fromJson -}}
+
+http:
+  routers:
+    {{- range $index, $element := $data }}
+    {{ $element.service }}:
+      rule: Host(`{{ $element.service }}.test.top`)
+      entryPoints:
+        - internal
+        - internal-secure
+      service: {{ $element.service }}
+      tls: true
+      middlewares:
+        - allow-cors
+    {{- end }}
+  services:
+    {{- range $index, $element := $data }}
+    {{ $element.service }}:
+      loadBalancer:
+        servers:
+        - url: {{ $element.url }}
+    {{- end }}

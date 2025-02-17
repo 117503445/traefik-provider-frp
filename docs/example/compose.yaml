@@ -9,7 +9,7 @@ services:
   traefik:
     image: traefik
     volumes:
-      - ./config/traefik/traefik.toml:/etc/traefik/config.toml
+      - ./config/traefik/traefik.yml:/etc/traefik/traefik.yaml
     ports:
       - "80:80"
   frps:

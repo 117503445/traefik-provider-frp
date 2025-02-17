@@ -10,7 +10,6 @@ http:
       entryPoints:
         - external
       service: {{ $element.service }}
-      tls: true
     {{- end }}
   services:
     {{- range $index, $element := $data }}

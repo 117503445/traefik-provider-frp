@@ -1,0 +1,21 @@
+loginFailExit = false
+
+serverAddr = "frps"
+serverPort = 80
+transport.protocol = "websocket"
+
+auth.token = "123456"
+
+[[proxies]]
+name = "app1"
+type = "tcp"
+localIP = "app1"
+localPort = 80
+metadatas.domain = ""
+
+[[proxies]]
+name = "app2"
+type = "tcp"
+localIP = "app2"
+localPort = 80
+metadatas.domain = ""

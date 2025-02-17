@@ -29,3 +29,6 @@ traefik.tmpl
 frp_dynamic.yml
 
 traefik-provider-frp
+!docs/example/config/traefik-provider-frp
+!docs/example/config/traefik-provider-frp/config.toml
+!docs/example/config/traefik-provider-frp/traefik.tmpl

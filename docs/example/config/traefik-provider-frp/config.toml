@@ -1,0 +1,4 @@
+"frps-admin.base-url" = "http://frps:7500"
+"frps-admin.username" = "admin"
+"frps-admin.password" = "12345678"
+# "traefik-writer.output-path" = "/shared-dynamic-cfg/frp_dynamic.yml"

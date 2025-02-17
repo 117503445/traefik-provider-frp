@@ -1,0 +1,15 @@
+log:
+  level: DEBUG
+
+providers:
+  http:
+    endpoint: "http://traefik-provider-frp:8081/traefik"
+
+api:
+  dashboard: true
+  # insecure: true
+
+entryPoints:
+  external:
+    address: ":80"
+    http3: {}

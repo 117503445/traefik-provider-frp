@@ -1,0 +1,21 @@
+{{- $data := `
+   $SERVICES$
+` | fromJson -}}
+
+http:
+  routers:
+    {{- range $index, $element := $data }}
+    {{ $element.service }}:
+      rule: Host(`{{ $element.service }}.example.com`)
+      entryPoints:
+        - external
+      service: {{ $element.service }}
+      tls: true
+    {{- end }}
+  services:
+    {{- range $index, $element := $data }}
+    {{ $element.service }}:
+      loadBalancer:
+        servers:
+        - url: {{ $element.url }}
+    {{- end }}

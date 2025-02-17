@@ -1,0 +1,32 @@
+name: traefik-provider-frp
+
+services:
+  traefik-provider-frp:
+    image: 117503445/traefik-provider-frp
+    volumes:
+      - ./config/traefik-provider-frp/config.toml:/workspace/config.toml
+      - ./config/traefik-provider-frp/traefik.tmpl:/workspace/traefik.tmpl
+  traefik:
+    image: traefik
+    volumes:
+      - ./config/traefik/traefik.toml:/etc/traefik/config.toml
+    ports:
+      - "80:80"
+  frps:
+    image: snowdreamtech/frps
+    restart: unless-stopped
+    volumes:
+      - ./config/frps/frps.toml:/etc/frp/frps.toml
+  frpc:
+    image: snowdreamtech/frpc
+    restart: unless-stopped
+    volumes:
+      - ./config/frpc/frpc.toml:/etc/frp/frpc.toml
+  app1:
+    image: traefik/whoami
+    hostname: app1
+    restart: unless-stopped
+  app2:
+    image: traefik/whoami
+    hostname: app2
+    restart: unless-stopped

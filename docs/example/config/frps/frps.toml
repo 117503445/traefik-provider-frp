@@ -1,0 +1,14 @@
+bindPort = 80
+auth.token = "123456"
+
+[webServer]
+addr = "0.0.0.0"
+port = 7500
+user = "admin"
+password = "12345678"
+
+[[httpPlugins]]
+name = "manager"
+addr = "http://traefik-provider-frp:8021"
+path = "/frp"
+ops = ["NewProxy", "CloseProxy"]

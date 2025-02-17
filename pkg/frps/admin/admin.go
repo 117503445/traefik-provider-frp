@@ -3,6 +3,7 @@ package admin
 import (
 	"117503445/traefik-provider-frp/pkg/traefik/writer"
 	"fmt"
+	"time"
 
 	"github.com/117503445/goutils"
 	"github.com/imroc/req/v3"
@@ -42,9 +43,16 @@ func (m *FrpsAdminManager) FetchProxies() {
 		// client := req.C().EnableDumpAll()
 		client := req.C()
 		url := fmt.Sprintf("%s/api/proxy/tcp", m.cfg.BaseUrl)
-		resp, err := client.R().SetBasicAuth(m.cfg.Username, m.cfg.Password).Get(url)
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to get full config from frps-admin")
+		var resp *req.Response
+		for {
+			var err error
+			resp, err = client.R().SetBasicAuth(m.cfg.Username, m.cfg.Password).Get(url)
+			if err != nil {
+				log.Warn().Err(err).Msg("failed to get full config from frps-admin")
+				time.Sleep(1 * time.Second)
+			} else {
+				break
+			}
 		}
 
 		domainPort := make(map[string]int)
